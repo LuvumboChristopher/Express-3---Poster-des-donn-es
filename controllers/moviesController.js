@@ -11,6 +11,18 @@ const getAllMovies = (req, res) => {
   })
 }
 
+const getSingleMovie = (req, res) => {
+  const {movieId} = req.params
+  connection.query('SELECT * FROM movies WHERE id = ?', movieId, (err, result) => {
+    if (err) {
+      console.error(err)
+      res.status(500).send('Error retrieving data from database')
+    } else {
+      res.status(200).json(result)
+    }
+  })
+}
+
 const uploadMovie = (req, res) => {
   const { title, director, year, color, duration } = req.body
   connection.query(
@@ -39,8 +51,22 @@ const updateMovie = (req, res) => {
     } else {
       res.status(200).send('Movie successfully updated')
       console.log(result.affectedRows)
-
     }
   })
 }
-module.exports = { getAllMovies, uploadMovie, updateMovie }
+
+const deleteMovie = (req, res) => {
+  const { movieId } = req.params
+
+  const sql = 'DELETE FROM movies WHERE id = ?'
+
+  connection.query(sql, movieId, (err, result) => {
+    if (err) {
+      res.status(500).send('Error deleting the movie')
+    } else {
+      res.status(200).send('Movie successfully deleted')
+    }
+  })
+}
+
+module.exports = { getAllMovies, getSingleMovie, uploadMovie, updateMovie, deleteMovie }
