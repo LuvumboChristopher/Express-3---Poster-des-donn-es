@@ -23,7 +23,7 @@ const getAllMovies = (req, res) => {
         console.error(err)
         res.status(500).send('Error retrieving data from database')
       } else {
-        res.status(200).json(result)
+        res.status(201).json(result)
       }
     })
 }
@@ -35,10 +35,12 @@ const getSingleMovie = (req, res) => {
       console.error(err)
       res.status(500).send('Error retrieving data from database')
     } else {
-      if(result && result.length === 0){
+      if (result && result.length === 0) {
         return res.status(404).send('Movie not found')
+      } else if (result.affectedRows === 0) {
+        res.status(404).send(`Movie with id ${movieId} not found.`)
       }
-      res.status(200).json(result)
+      res.status(201).json(result)
     }
   })
 }
@@ -52,7 +54,9 @@ const uploadMovie = (req, res) => {
       if (err) {
         res.status(500).send('Error saving the movie')
       } else {
-        res.status(200).send('Movie successfully saved')
+        const id = result.insertId
+        const createdMovie = {id, title, director, year, color, duration }
+        res.status(201).json(createdMovie)
       }
     }
   )
@@ -68,9 +72,10 @@ const updateMovie = (req, res) => {
   connection.query(sql, values, (err, result) => {
     if (err) {
       res.status(500).send('Error updating the movie')
+    } else if (result.affectedRows === 0) {
+      res.status(404).send(`Movie with id ${movieId} not found.`)
     } else {
-      res.status(200).send('Movie successfully updated')
-      console.log(result.affectedRows)
+      res.sendStatus(204)
     }
   })
 }
@@ -84,7 +89,7 @@ const deleteMovie = (req, res) => {
     if (err) {
       res.status(500).send('Error deleting the movie')
     } else {
-      res.status(200).send('Movie successfully deleted')
+      res.sendStatus(204)
     }
   })
 }

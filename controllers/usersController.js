@@ -43,7 +43,9 @@ const createUser = (req, res) => {
     if (err) {
       res.status(500).send('Error saving creating the user')
     } else {
-      res.status(200).send('User successfully created')
+      const id = result.insertId
+      const createdUser = { id, firstname, lastname, email }
+      res.status(201).json(createdUser)
     }
   })
 }
@@ -57,9 +59,12 @@ const updateUser = (req, res) => {
 
   connection.query(sql, values, (err, result) => {
     if (err) {
-      res.status(500).send('Error updating the user')
+      console.log(err)
+      res.status(500).send('Error updating a user')
+    } else if (result.affectedRows === 0) {
+      res.status(404).send(`User with id ${userId} not found.`)
     } else {
-      res.status(200).send('User successfully updated')
+      res.sendStatus(204)
     }
   })
 }
