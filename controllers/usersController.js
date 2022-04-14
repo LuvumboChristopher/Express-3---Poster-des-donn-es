@@ -1,8 +1,15 @@
 const connection = require('../db/db-config')
 
 const getAllUsers = (req, res) => {
-  const sql = 'SELECT * FROM users'
-  connection.query(sql, (err, result) => {
+  let sql = 'SELECT * FROM users'
+  const sqlValues = []
+
+  if (req.query.language) {
+    sql += ' WHERE language = ?'
+    sqlValues.push(req.query.language)
+  }
+
+  connection.query(sql, sqlValues, (err, result) => {
     if (err) {
       res.status(500).send('Error retraiving all users')
     } else {
@@ -21,7 +28,10 @@ const getSingleUser = (req, res) => {
     if (err) {
       res.status(500).send('Error retraving the user')
     } else {
-      res.status(200).json(result)
+      if(result && result.length > 0){
+        return res.status(200).json(result)
+      }
+      res.status(404).send('User not found')
     }
   })
 }
